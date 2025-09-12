@@ -1,0 +1,48 @@
+﻿@model List<Trainee_Task.Models.PersonModel>
+@{
+    ViewData["Title"] = "Загрузка CSV";
+}
+
+<h2>Загрузка CSV файла</h2>
+
+<form asp-action="Index" asp-controller="People" enctype="multipart/form-data" method="post">
+    <input type="file" name="file" />
+    <button type="submit">Загрузить</button>
+</form>
+
+<hr />
+
+<h2>Список людей в базе</h2>
+
+@if (Model != null && Model.Count > 0)
+{
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Birthday</th>
+                <th>Maried</th>
+                <th>Phone</th>
+                <th>Salary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var person in Model)
+            {
+                <tr>
+                    <td>@person.Id</td>
+                    <td>@person.Name</td>
+                    <td>@person.Birthday.ToShortDateString()</td>
+                    <td>@(person.Maried ? "Да" : "Нет")</td>
+                    <td>@person.Phone</td>
+                    <td>@person.Salary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>В базе пока нет данных.</p>
+}

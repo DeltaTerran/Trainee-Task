@@ -1,0 +1,32 @@
+﻿@model List<PersonModel>
+
+@{
+    ViewData["Title"] = "Предпросмотр данных";
+}
+
+<h2>Предпросмотр данных</h2>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Email</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>@item.Name</td>
+            <td>@item.Birthday</td>
+            <td>@item.Maried</td>
+            <td>@item.Phone</td>
+            <td>@item.Salary</td>
+            
+
+        </tr>
+    }
+</table>
+
+<form asp-action="SaveToDb" asp-controller="People" method="post">
+    <button type="submit">Сохранить в БД</button>
+</form>

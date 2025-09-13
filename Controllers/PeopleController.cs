@@ -35,15 +35,15 @@ namespace Trainee_Task.Controllers
 
                     while ((line = await reader.ReadLineAsync()) != null)
                     {
-                        if (isFirstLine) // пропускаем заголовок
+                        if (isFirstLine) 
                         {
                             isFirstLine = false;
                             continue;
                         }
 
-                        var columns = line.Split(';'); // или ','
+                        var columns = line.Split(';'); 
 
-                        if (columns.Length < 3) continue; // пропуск некорректных строк
+                        if (columns.Length < 3) continue; 
 
                         list.Add(new PersonModel
                         {
@@ -56,21 +56,51 @@ namespace Trainee_Task.Controllers
                     }
                 }
 
-                // Покажем данные пользователю перед сохранением
+                
                 TempData["CsvData"] = System.Text.Json.JsonSerializer.Serialize(list);
                 return RedirectToAction("Preview");
             }
 
             return View();
         }
+        [HttpPost]
+        public async Task<IActionResult> UpdateField(int id, string fieldName, string fieldValue)
+        {
+            var person = await _context.People.FindAsync(id);
+            if (person == null) return NotFound();
 
+            switch (fieldName)
+            {
+                case "Name":
+                    person.Name = fieldValue;
+                    break;
+                case "Birthday":
+                    if (DateTime.TryParse(fieldValue, out var date))
+                        person.Birthday = date;
+                    break;
+                case "Maried":
+                    if (bool.TryParse(fieldValue, out var maried))
+                        person.Maried = maried;
+                    break;
+                case "Phone":
+                    person.Phone = fieldValue;
+                    break;
+                case "Salary":
+                    if (decimal.TryParse(fieldValue, out var salary))
+                        person.Salary = salary;
+                    break;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
 
         [HttpGet]
         public IActionResult Preview()
         {
             if (TempData["CsvData"] is string json)
             {
-                TempData.Keep("CsvData"); // ← сохраняем данные еще на один запрос
+                TempData.Keep("CsvData"); 
                 var list = System.Text.Json.JsonSerializer.Deserialize<List<PersonModel>>(json);
                 return View(list);
             }

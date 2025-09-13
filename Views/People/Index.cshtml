@@ -1,4 +1,4 @@
-﻿@model List<Trainee_Task.Models.PersonModel>
+﻿@model IEnumerable<Trainee_Task.Models.PersonModel>
 @{
     ViewData["Title"] = "Загрузка CSV";
 }
@@ -12,37 +12,81 @@
 
 <hr />
 
-<h2>Список людей в базе</h2>
+<h2>Список людей (редактируемая таблица)</h2>
 
-@if (Model != null && Model.Count > 0)
-{
-    <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Birthday</th>
-                <th>Maried</th>
-                <th>Phone</th>
-                <th>Salary</th>
+<table class="table table-bordered" id="peopleTable">
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Дата рождения</th>
+            <th>Женат/Замужем</th>
+            <th>Телефон</th>
+            <th>Зарплата</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var person in Model)
+        {
+            <tr data-id="@person.Id">
+                <td contenteditable="true" data-field="Name">@person.Name</td>
+                <td contenteditable="true" data-field="Birthday">@person.Birthday.ToString("yyyy-MM-dd")</td>
+                <td contenteditable="true" data-field="Maried">@person.Maried</td>
+                <td contenteditable="true" data-field="Phone">@person.Phone</td>
+                <td contenteditable="true" data-field="Salary">@person.Salary</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var person in Model)
-            {
-                <tr>
-                    <td>@person.Id</td>
-                    <td>@person.Name</td>
-                    <td>@person.Birthday.ToShortDateString()</td>
-                    <td>@(person.Maried ? "Да" : "Нет")</td>
-                    <td>@person.Phone</td>
-                    <td>@person.Salary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>В базе пока нет данных.</p>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+    <script>
+        $("#peopleTable td[contenteditable=true]").on("blur", function () {
+            var td = $(this);
+            var id = td.closest("tr").data("id");
+            var field = td.data("field");
+            var value = td.text().trim();
+
+            $.ajax({
+                url: '@Url.Action("UpdateField", "People")',
+                method: "POST",
+                data: { id: id, fieldName: field, fieldValue: value },
+                success: function (res) {
+                    console.log("Updated:", res);
+                },
+                error: function () {
+                    alert("Ошибка при сохранении!");
+                }
+            });
+        });
+        $(document).ready(function () {
+            var table = $('#peopleTable').DataTable({
+                paging: true,    
+                searching: true, 
+                ordering: true   
+            });
+
+            $('#peopleTable').on("blur", "td[contenteditable=true]", function () {
+                var td = $(this);
+                var id = td.closest("tr").data("id");
+                var field = td.data("field");
+                var value = td.text().trim();
+
+                $.ajax({
+                    url: '@Url.Action("UpdateField", "People")',
+                    method: "POST",
+                    data: { id: id, fieldName: field, fieldValue: value },
+                    success: function () {
+                        td.css("background-color", "#d4edda");
+                        setTimeout(() => td.css("background-color", ""), 1000);
+                    },
+                    error: function () {
+                        td.css("background-color", "#f8d7da");
+                    }
+                });
+            });
+        });
+    </script>
 }

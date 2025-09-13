@@ -114,7 +114,10 @@ namespace Trainee_Task.Controllers
             if (TempData["CsvData"] is string json)
             {
                 var list = System.Text.Json.JsonSerializer.Deserialize<List<PersonModel>>(json);
-
+                if (!ModelState.IsValid)
+                {
+                    return View("Preview", list); // вернём с ошибками
+                }
                 _context.People.AddRange(list);
                 await _context.SaveChangesAsync();
             }
